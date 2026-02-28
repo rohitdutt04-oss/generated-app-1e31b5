@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do App</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body>
+    <div id="root"></div>
+    <script src="https://unpkg.com/react@17/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script type="text/babel">
+        const apiContract = {
+            endpoints: [
+                { method: "POST", path: "/users/", requestBody: { username: "string", email: "string", password: "string" }, responseBody: { id: "integer", username: "string", email: "string" } },
+                { method: "GET", path: "/users/", responseBody: [{ id: "integer", username: "string", email: "string" }] },
+                { method: "POST", path: "/tasks/", requestBody: { title: "string", description: "string", due_date: "string", completed: "boolean" }, responseBody: { id: "integer", title: "string", description: "string", due_date: "string", completed: "boolean" } },
+                { method: "GET", path: "/tasks/", responseBody: [{ id: "integer", title: "string", description: "string", due_date: "string", completed: "boolean" }] },
+                { method: "POST", path: "/task_assignments/", requestBody: { task_id: "integer", user_id: "integer" }, responseBody: { id: "integer", task_id: "integer", user_id: "integer" } },
+                { method: "GET", path: "/task_assignments/", responseBody: [{ id: "integer", task_id: "integer", user_id: "integer" }] }
+            ]
+        };
+        
+        function registerUser(username, email, password) {
+            return fetch('/users/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, email, password })
+            })
+            .then(response => response.json())
+            .catch(error => console.error('Error registering user:', error));
+        }
+        
+        function createTask(title, description, dueDate) {
+            return fetch('/tasks/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title, description, due_date: dueDate, completed: false })
+            })
+            .then(response => response.json())
+            .catch(error => console.error('Error creating task:', error));
+        }
+        
+        function assignTask(taskId, userId) {
+            return fetch('/task_assignments/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ task_id: taskId, user_id: userId })
+            })
+            .then(response => response.json())
+            .catch(error => console.error('Error assigning task:', error));
+        }
+        
+        function getTasks() {
+            return fetch('/tasks/')
+            .then(response => response.json())
+            .catch(error => console.error('Error getting tasks:', error));
+        }
+        
+        function App() {
+            const [username, setUsername] = React.useState('');
+            const [email, setEmail] = React.useState('');
+            const [password, setPassword] = React.useState('');
+            const [title, setTitle] = React.useState('');
+            const [description, setDescription] = React.useState('');
+            const [dueDate, setDueDate] = React.useState('');
+            const [tasks, setTasks] = React.useState([]);
+            
+            const handleRegister = () => {
+                registerUser(username, email, password)
+                .then(user => console.log('User registered:', user));
+            };
+            
+            const handleCreateTask = () => {
+                createTask(title, description, dueDate)
+                .then(task => console.log('Task created:', task));
+            };
+            
+            const handleAssignTask = (taskId, userId) => {
+                assignTask(taskId, userId)
+                .then(taskAssignment => console.log('Task assigned:', taskAssignment));
+            };
+            
+            const handleGetTasks = () => {
+                getTasks()
+                .then(tasks => setTasks(tasks));
+            };
+            
+            return (
+                <div className="container mx-auto p-4 pt-6 mt-10">
+                    <h1 className="text-3xl font-bold mb-4">To-Do App</h1>
+                    <div className="mb-4">
+                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="username">Username:</label>
+                        <input className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="username" type="text" value={username} onChange={e => setUsername(e.target.value)} />
+                    </div>
+                    <div className="mb-4">
+                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">Email:</label>
+                        <input className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} />
+                    </div>
+                    <div className="mb-4">
+                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="password">Password:</label>
+                        <input className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="password" type="password" value={password} onChange={e => setPassword(e.target.value)} />
+                    </div>
+                    <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={handleRegister}>Register</button>
+                    <div className="mt-10">
+                        <h2 className="text-2xl font-bold mb-4">Create Task</h2>
+                        <div className="mb-4">
+                            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="title">Title:</label>
+                            <input className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="title" type="text" value={title} onChange={e => setTitle(e.target.value)} />
+                        </div>
+                        <div className="mb-4">
+                            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="description">Description:</label>
+                            <textarea className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="description" value={description} onChange={e => setDescription(e.target.value)}></textarea>
+                        </div>
+                        <div className="mb-4">
+                            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="dueDate">Due Date:</label>
+                            <input className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="dueDate" type="date" value={dueDate} onChange={e => setDueDate(e.target.value)} />
+                        </div>
+                        <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={handleCreateTask}>Create Task</button>
+                    </div>
+                    <div className="mt-10">
+                        <h2 className="text-2xl font-bold mb-4">Tasks</h2>
+                        <ul>
+                            {tasks.map(task => (
+                                <li key={task.id} className="mb-4">
+                                    <h3 className="text-xl font-bold mb-2">{task.title}</h3>
+                                    <p className="text-gray-700">{task.description}</p>
+                                    <p className="text-gray-700">Due Date: {task.due_date}</p>
+                                    <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={() => handleAssignTask(task.id, 1)}>Assign Task</button>
+                                </li>
+                            ))}
+                        </ul>
+                        <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={handleGetTasks}>Get Tasks</button>
+                    </div>
+                </div>
+            );
+        }
+        
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>
