@@ -1,0 +1,14 @@
+services:
+  web:
+    type: web
+    env: python
+    region: oregon
+    plan: free
+    buildCommand: "echo 'Building...'
+"
+    startCommand: "python main.py"
+    envVars:
+    - key: VARIABLE
+      value: VALUE
+    - key: VARIABLE2
+      value: VALUE2
